@@ -24,40 +24,45 @@ let transactions = localStorage
     .getItem('transactions') !== null ? localStorageTransactions : []
 
 const removeTransaction = ID => {
-    transactions = transactions.filter(transaction => transaction.id !== ID)
+    transactions = transactions.filter(transaction => id !== ID)
     updateLocalStorage()
     init()
 }
 
-const addTransactionIntoDOM = transaction => {
-    const operador = transaction.amount < 0 ? '-' : '+'
-    const CSSClass = transaction.amount < 0 ? 'minus' : 'plus'
-    const amountWithoutOperator = Math.abs(transaction.amount)
+const addTransactionIntoDOM = ({ amount, name, id }) => {
+    const operador = amount < 0 ? '-' : '+'
+    const CSSClass = amount < 0 ? 'minus' : 'plus'
+    const amountWithoutOperator = Math.abs(amount)
     const li = document.createElement('li')
 
     li.classList.add(CSSClass)
     li.innerHTML = `
-    ${transaction.name} <span>${operador} R$ ${amountWithoutOperator}</span>
-    <button class="delete-btn" onClick="removeTransaction(${transaction.id})">
-    x
-    </button>
+    ${name} <span>${operador} R$ ${amountWithoutOperator}</span>
+    <button class="delete-btn" onClick="removeTransaction(${id})">x</button>
     `
     transactionUl.append(li)
 }
 
-const updateBalanceValues = () => {
-    const transactionAmounts = transactions.map(transaction => transaction.amount)
-    const total = transactionAmounts
-        .reduce((accumulator, transaction) => accumulator + transaction, 0)
-        .toFixed(2)
-    const income = transactionAmounts
-        .filter(item => item > 0)
-        .reduce((accumulator, value) => accumulator + value, 0)
-        .toFixed(2)
-    const expense = Math.abs(transactionAmounts
+const getExtenses = transactionAmounts =>
+    Math.abs(transactionAmounts
         .filter(item => item < 0)
         .reduce((accumulator, value) => accumulator + value, 0))
         .toFixed(2)
+
+const getIncome = transactionAmounts => transactionAmounts
+    .filter(item => item > 0)
+    .reduce((accumulator, value) => accumulator + value, 0)
+    .toFixed(2)
+
+const getTotal = transactionAmounts
+    .reduce((accumulator, transaction) => accumulator + transaction, 0)
+    .toFixed(2)
+
+const updateBalanceValues = () => {
+    const transactionAmounts = transactions.map(({ amount }) => amount)
+    const total = getTotal(transactionAmounts)
+    const income = getIncome(transactionAmounts)
+    const expense = getExtenses(transactionAmounts)
 
     balenceDisplay.textContent = `R$ ${total}`
     incomeDisplay.textContent = `R$ ${income}`
